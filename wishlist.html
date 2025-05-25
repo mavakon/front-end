@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Family Hub – Wishlist</title>
+  <link href="https://fonts.cdnfonts.com/css/cocon" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" role="navigation" aria-label="Main menu">
+    <header class="sidebar-header">
+      <h2>Menu</h2>
+    </header>
+    <nav class="menu-container" aria-label="Site navigation">
+      <ul class="menu-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="weather.html">Weather</a></li>
+        <li><a href="wishlist.html">Wishlist</a></li>
+        <li><a href="plans.html">Plans</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <img src="images/logo.png" alt="Family Hub Logo" class="logo">
+    <header class="page-header">
+      <h1>Shared Wishlist</h1>
+    </header>
+    <section>
+      <form action="#" method="post" class="wishlist-form">
+        <label for="item">Item Name:</label>
+        <input type="text" id="item" name="item">
+
+        <label for="description">Description:</label>
+        <textarea id="description" name="description"></textarea>
+
+        <label for="category">Category:</label>
+        <select id="category" name="category">
+          <option value="toy">Toy</option>
+          <option value="book">Book</option>
+          <option value="clothing">Clothing</option>
+        </select>
+
+        <button type="submit">Add</button>
+      </form>
+    </section>
+    <section class="wishlists">
+      <h2>Your Wishlists</h2>
+      <ol>
+        <li>Socks</li>
+        <li>Toy Helicopter</li>
+      </ol>
+    </section>
+  </main>
+</div>
+</body>
+</html>

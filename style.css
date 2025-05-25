@@ -1,0 +1,466 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Cocon', sans-serif;
+    color: #222;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+    border: 1px solid #333;
+}
+
+/* ===========================
+   БОКОВА ПАНЕЛЬ
+   =========================== */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 240px;
+    background: #1F78B4;
+    color: #fff;
+}
+
+.sidebar-header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+
+.menu-container {
+    flex: 1;                        /* займає весь простір після header */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;       /* центр по вертикалі */
+    align-items: center;           /* центр по горизонталі */
+}
+
+.menu-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;   /* рівні відстані між пунктами */
+    padding: 0;
+    margin: 0;
+}
+
+.menu-list li + li {
+    margin-top: 1.5rem; /* відступ між пунктами */
+}
+
+.menu-list a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    font-size: 1.2rem;
+    text-align: center;
+    transition: transform 0.3s ease, color 0.3s ease;
+    position: relative;
+}
+
+.menu-list a:hover {
+    transform: scale(1.1);
+    color: #B3CDE0;
+}
+
+.menu-list a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 50%;
+    background-color: #B3CDE0;
+    transition: width 0.3s ease, left 0.3s ease;
+}
+
+.menu-list a:hover::after {
+    width: 100%;
+    left: 0;
+}
+
+/* ===========================
+   ОСНОВНИЙ КОНТЕНТ
+   =========================== */
+.content {
+    flex: 1;
+    background: #B3CDE0;
+    position: relative;
+    padding: 40px 60px;
+    overflow: auto;
+}
+
+/* Floating elements with different positioning */
+.fixed-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #1F78B4;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 100;
+}
+
+.fixed-button:hover {
+    background-color: #166ca3;
+    transform: scale(1.1);
+}
+
+.float-left {
+    float: left;
+    margin-right: 15px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 5px;
+}
+
+.float-right {
+    float: right;
+    margin-left: 15px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 5px;
+}
+
+.logo {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 80px;
+    height: auto;
+    transition: transform 0.5s ease;
+    animation: logoEntrance 1s ease-out;
+}
+
+.logo:hover {
+    transform: rotate(10deg);
+}
+
+@keyframes logoEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    animation: headerEntrance 1.2s ease-out;
+    position: relative;
+}
+
+.page-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: #1F78B4;
+    animation: underlineExpand 1.5s ease-out forwards;
+    transform-origin: left;
+}
+
+@keyframes headerEntrance {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes underlineExpand {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+.intro-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-left: 1rem;
+    border-left: 4px solid rgba(0,0,0,0.2);
+    padding-left: 1rem;
+    animation: fadeIn 1.5s ease-out;
+    animation-delay: 0.5s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Features Section */
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.feature-item {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: featureEntrance 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+.feature-item:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.feature-item:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.feature-item:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+.feature-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.feature-item h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    color: #1F78B4;
+}
+
+.feature-icon {
+    width: 40px;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.feature-item:hover .feature-icon {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.feature-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #1F78B4, #B3CDE0);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.feature-item:hover::before {
+    transform: scaleX(1);
+}
+
+@keyframes featureEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Table styles */
+.table-container {
+    margin: 2rem 0;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background-color: white;
+}
+
+caption {
+    font-weight: bold;
+    padding: 10px;
+    background-color: #1F78B4;
+    color: white;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Form styles */
+.wishlist-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.wishlist-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.wishlist-form input[type="text"],
+.wishlist-form textarea,
+.wishlist-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.wishlist-form button {
+    background-color: #1F78B4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+}
+
+.wishlist-form button:hover {
+    background-color: #166ca3;
+}
+
+/* ID selector example */
+#main-content {
+    padding: 20px;
+    background-color: rgba(255,255,255,0.8);
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+/* Attribute selector example */
+[role="navigation"] {
+    border-right: 3px solid rgba(255,255,255,0.2);
+}
+
+input[type="text"]:focus {
+    border-color: #1F78B4;
+    outline: none;
+    box-shadow: 0 0 5px rgba(31, 120, 180, 0.5);
+}
+
+/* Responsive design with media queries */
+@media screen and (max-width: 768px) {
+    .layout {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+    }
+
+    .menu-container {
+        padding: 20px 0;
+    }
+
+    .menu-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .menu-list li {
+        margin: 0 10px;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .float-left, .float-right {
+        float: none;
+        margin: 15px 0;
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .logo {
+        width: 60px;
+    }
+
+    .menu-list a {
+        font-size: 1rem;
+    }
+}
+
+.plan-map svg {
+    display: block;
+    margin: 0;          /* remove any default margins */
+}
