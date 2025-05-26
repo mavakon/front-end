@@ -6,10 +6,11 @@
   <title>Family Hub – Wishlist</title>
   <link href="https://fonts.cdnfonts.com/css/cocon" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="scripts/wishlist.js"></script>
 </head>
 <body>
 <div class="layout">
-  <aside class="sidebar" role="navigation" aria-label="Main menu">
+  <aside class="sidebar" role="region" aria-label="Main menu">
     <header class="sidebar-header">
       <h2>Menu</h2>
     </header>
@@ -29,30 +30,58 @@
     <header class="page-header">
       <h1>Shared Wishlist</h1>
     </header>
-    <section>
-      <form action="#" method="post" class="wishlist-form">
-        <label for="item">Item Name:</label>
-        <input type="text" id="item" name="item">
 
-        <label for="description">Description:</label>
-        <textarea id="description" name="description"></textarea>
+    <!-- Error Message Container -->
+    <div id="error-message" class="message-container" style="display: none;"></div>
 
-        <label for="category">Category:</label>
-        <select id="category" name="category">
-          <option value="toy">Toy</option>
-          <option value="book">Book</option>
-          <option value="clothing">Clothing</option>
-        </select>
+    <!-- Login Section -->
+    <section id="login-container" class="login-section">
+      <h2>Login to Your Wishlist</h2>
 
-        <button type="submit">Add</button>
+      <form id="login-form" class="login-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" placeholder="Enter your username">
+        <div id="username-error" class="field-error"></div>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password">
+        <div id="password-error" class="field-error"></div>
+
+        <button type="submit">Login</button>
       </form>
+      <p class="login-hint">Try with: user1/pass1 or user2/pass2</p>
     </section>
-    <section class="wishlists">
-      <h2>Your Wishlists</h2>
-      <ol>
-        <li>Socks</li>
-        <li>Toy Helicopter</li>
-      </ol>
+
+    <!-- Wishlist Section (initially hidden, shown after login) -->
+    <section id="wishlist-section">
+      <section class="form-section">
+        <h2>Add New Item</h2>
+        <form id="wishlist-form" class="wishlist-form">
+          <label for="item">Item Name:</label>
+          <input type="text" id="item" name="item" placeholder="Enter item name (min 3 characters)">
+          <div id="item-error" class="field-error"></div>
+
+          <label for="description">Description:</label>
+          <textarea id="description" name="description" placeholder="Enter a description"></textarea>
+          <div id="description-error" class="field-error"></div>
+
+          <label for="category">Category:</label>
+          <select id="category" name="category">
+            <option value="toy">Toy</option>
+            <option value="book">Book</option>
+            <option value="clothing">Clothing</option>
+          </select>
+
+          <button type="submit">Add to Wishlist</button>
+        </form>
+      </section>
+
+      <section class="wishlists">
+        <h2>Your Wishlist Items</h2>
+        <ul id="wishlist-items" class="wishlist-items-container">
+          <!-- Dynamic Item Display -->
+        </ul>
+      </section>
     </section>
   </main>
 </div>
