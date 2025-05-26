@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Family Hub – Register</title>
+  <link href="https://fonts.cdnfonts.com/css/cocon" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" role="region" aria-label="Main menu">
+    <header class="sidebar-header">
+      <h2>Menu</h2>
+    </header>
+    <nav class="menu-container" aria-label="Site navigation">
+      <ul class="menu-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="weather.html">Weather</a></li>
+        <li><a href="wishlist.html">Wishlist</a></li>
+        <li><a href="plans.html">Plans</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <img src="images/logo.png" alt="Family Hub Logo" class="logo">
+    <header class="page-header">
+      <h1>Create an Account</h1>
+    </header>
+
+    <div id="register-root"></div>
+  </main>
+</div>
+
+<!-- React Registration App -->
+<script type="text/babel">
+  // Registration Form Component
+  function RegistrationForm() {
+    const [formData, setFormData] = React.useState({
+      username: '',
+      password: '',
+      confirmPassword: ''
+    });
+    const [errors, setErrors] = React.useState({});
+    const [loading, setLoading] = React.useState(false);
+    const [success, setSuccess] = React.useState(false);
+
+    // Get current time for dynamic styling
+    const currentHour = new Date().getHours();
+    const isDarkMode = currentHour < 6 || currentHour >= 20; // Dark mode between 8 PM and 6 AM
+
+    const formStyle = {
+      maxWidth: '400px',
+      margin: '0 auto',
+      padding: '20px',
+      borderRadius: '8px',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+      backgroundColor: isDarkMode ? '#333' : '#fff',
+      color: isDarkMode ? '#eee' : '#333'
+    };
+
+    const inputStyle = {
+      width: '100%',
+      padding: '10px',
+      marginBottom: '15px',
+      borderRadius: '4px',
+      border: '1px solid #ddd',
+      backgroundColor: isDarkMode ? '#444' : '#fff',
+      color: isDarkMode ? '#eee' : '#333'
+    };
+
+    const buttonStyle = {
+      width: '100%',
+      padding: '12px',
+      backgroundColor: isDarkMode ? '#5c8a9d' : '#4a7a8c',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontSize: '16px'
+    };
+
+    const errorStyle = {
+      color: '#e74c3c',
+      fontSize: '14px',
+      marginTop: '-10px',
+      marginBottom: '15px'
+    };
+
+    const successStyle = {
+      color: '#2ecc71',
+      marginBottom: '15px',
+      textAlign: 'center'
+    };
+
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+      
+      // Clear error when user types
+      if (errors[name]) {
+        setErrors({
+          ...errors,
+          [name]: ''
+        });
+      }
+    };
+
+    const validateForm = () => {
+      const newErrors = {};
+      
+      if (!formData.username || formData.username.length < 3) {
+        newErrors.username = 'Username must be at least 3 characters';
+      }
+      
+      if (!formData.password || formData.password.length < 5) {
+        newErrors.password = 'Password must be at least 5 characters';
+      }
+      
+      if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match';
+      }
+      
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      
+      if (!validateForm()) {
+        return;
+      }
+      
+      setLoading(true);
+
+      try {
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: formData.username,
+            password: formData.password
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Registration failed');
+        }
+
+        setSuccess(true);
+        // Redirect to home page after successful registration
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+      } catch (err) {
+        setErrors({
+          ...errors,
+          general: err.message
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <div style={formStyle}>
+        {errors.general && <div style={{ ...errorStyle, textAlign: 'center' }}>{errors.general}</div>}
+        {success && <div style={successStyle}>Registration successful! Redirecting...</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              style={inputStyle}
+              required
+            />
+            {errors.username && <div style={errorStyle}>{errors.username}</div>}
+          </div>
+          
+          <div>
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              style={inputStyle}
+              required
+            />
+            {errors.password && <div style={errorStyle}>{errors.password}</div>}
+          </div>
+          
+          <div>
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              style={inputStyle}
+              required
+            />
+            {errors.confirmPassword && <div style={errorStyle}>{errors.confirmPassword}</div>}
+          </div>
+          
+          <button 
+            type="submit" 
+            style={buttonStyle}
+            disabled={loading}
+          >
+            {loading ? 'Creating Account...' : 'Register'}
+          </button>
+        </form>
+        
+        <p style={{ textAlign: 'center', marginTop: '20px' }}>
+          Already have an account? <a href="/login.html">Login</a>
+        </p>
+      </div>
+    );
+  }
+
+  // Render the Registration component
+  const container = document.getElementById('register-root');
+  const root = ReactDOM.createRoot(container);
+  root.render(<RegistrationForm />);
+</script>
+</body>
+</html>

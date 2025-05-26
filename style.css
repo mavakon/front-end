@@ -528,12 +528,6 @@ input[type="text"]:focus {
     animation: slideDown 0.3s ease-out;
 }
 
-.error-message {
-    background-color: #ffebee;
-    color: #c62828;
-    border-left: 4px solid #c62828;
-}
-
 .success-message {
     background-color: #e8f5e9;
     color: #2e7d32;
@@ -641,4 +635,79 @@ input.error {
 
 input.error:focus {
     box-shadow: 0 0 5px rgba(198, 40, 40, 0.5);
+}
+
+.weather-app {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+.location-selector {
+    margin-bottom: 20px;
+}
+.location-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.location-buttons button {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.location-buttons button.active {
+    background-color: #4a90e2;
+    color: white;
+    border-color: #4a90e2;
+}
+.weather-cards-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.weather-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    width: 300px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 0 auto;
+}
+.weather-card-header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+.weather-card-header h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    text-align: center;
+    color: #333;
+}
+.weather-card-header p {
+    margin: 0;
+    color: #666;
+}
+.temperature-container, .details-container, .additional-info {
+    margin-top: 15px;
+}
+.temperature-item, .detail-item, .info-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+.label {
+    color: #666;
+}
+.value {
+    font-weight: bold;
+}
+.loading-container, .error-container {
+    text-align: center;
+    padding: 20px;
+}
+.error-message {
+    color: #d9534f;
 }

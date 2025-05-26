@@ -6,7 +6,9 @@
   <title>Family Hub – Wishlist</title>
   <link href="https://fonts.cdnfonts.com/css/cocon" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script src="scripts/wishlist.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
 <div class="layout">
@@ -31,58 +33,511 @@
       <h1>Shared Wishlist</h1>
     </header>
 
-    <!-- Error Message Container -->
-    <div id="error-message" class="message-container" style="display: none;"></div>
+    <div id="wishlist-root"></div>
 
-    <!-- Login Section -->
-    <section id="login-container" class="login-section">
-      <h2>Login to Your Wishlist</h2>
+    <!-- React Wishlist App -->
+    <script type="text/babel">
+      // Main Wishlist App Component
+      function WishlistApp() {
+        const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+        const [username, setUsername] = React.useState('');
+        const [loading, setLoading] = React.useState(true);
+        const [error, setError] = React.useState('');
 
-      <form id="login-form" class="login-form">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" placeholder="Enter your username">
-        <div id="username-error" class="field-error"></div>
+        // Get current time for dynamic styling
+        const currentHour = new Date().getHours();
+        const isDarkMode = currentHour < 6 || currentHour >= 20; // Dark mode between 8 PM and 6 AM
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" placeholder="Enter your password">
-        <div id="password-error" class="field-error"></div>
+        // Check if user is logged in on component mount
+        React.useEffect(() => {
+          const checkLoginStatus = async () => {
+            try {
+              // Get username from cookie
+              const cookies = document.cookie.split(';');
+              const usernameCookie = cookies.find(cookie => cookie.trim().startsWith('username='));
 
-        <button type="submit">Login</button>
-      </form>
-      <p class="login-hint">Try with: user1/pass1 or user2/pass2</p>
-    </section>
+              if (usernameCookie) {
+                const user = usernameCookie.split('=')[1];
+                setUsername(user);
+                setIsLoggedIn(true);
+              }
+            } catch (err) {
+              console.error('Error checking login status:', err);
+            } finally {
+              setLoading(false);
+            }
+          };
 
-    <!-- Wishlist Section (initially hidden, shown after login) -->
-    <section id="wishlist-section">
-      <section class="form-section">
-        <h2>Add New Item</h2>
-        <form id="wishlist-form" class="wishlist-form">
-          <label for="item">Item Name:</label>
-          <input type="text" id="item" name="item" placeholder="Enter item name (min 3 characters)">
-          <div id="item-error" class="field-error"></div>
+          checkLoginStatus();
+        }, []);
 
-          <label for="description">Description:</label>
-          <textarea id="description" name="description" placeholder="Enter a description"></textarea>
-          <div id="description-error" class="field-error"></div>
+        // Render appropriate component based on login status
+        if (loading) {
+          return <LoadingSpinner />;
+        }
 
-          <label for="category">Category:</label>
-          <select id="category" name="category">
-            <option value="toy">Toy</option>
-            <option value="book">Book</option>
-            <option value="clothing">Clothing</option>
-          </select>
+        return (
+          <div className={`wishlist-container ${isDarkMode ? 'dark-mode' : ''}`}>
+            {isLoggedIn ? (
+              <WishlistManager username={username} setIsLoggedIn={setIsLoggedIn} isDarkMode={isDarkMode} />
+            ) : (
+              <LoginForm setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} isDarkMode={isDarkMode} />
+            )}
+          </div>
+        );
+      }
 
-          <button type="submit">Add to Wishlist</button>
-        </form>
-      </section>
+      // Login Form Component
+      function LoginForm({ setIsLoggedIn, setUsername, isDarkMode }) {
+        const [formData, setFormData] = React.useState({
+          username: '',
+          password: ''
+        });
+        const [error, setError] = React.useState('');
+        const [loading, setLoading] = React.useState(false);
 
-      <section class="wishlists">
-        <h2>Your Wishlist Items</h2>
-        <ul id="wishlist-items" class="wishlist-items-container">
-          <!-- Dynamic Item Display -->
-        </ul>
-      </section>
-    </section>
+        const formStyle = {
+          maxWidth: '400px',
+          margin: '0 auto',
+          padding: '20px',
+          borderRadius: '8px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          backgroundColor: isDarkMode ? '#333' : '#fff',
+          color: isDarkMode ? '#eee' : '#333'
+        };
+
+        const inputStyle = {
+          width: '100%',
+          padding: '10px',
+          marginBottom: '15px',
+          borderRadius: '4px',
+          border: '1px solid #ddd',
+          backgroundColor: isDarkMode ? '#444' : '#fff',
+          color: isDarkMode ? '#eee' : '#333'
+        };
+
+        const buttonStyle = {
+          width: '100%',
+          padding: '12px',
+          backgroundColor: isDarkMode ? '#5c8a9d' : '#4a7a8c',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '16px'
+        };
+
+        const errorStyle = {
+          color: '#e74c3c',
+          marginBottom: '15px',
+          textAlign: 'center'
+        };
+
+        const handleChange = (e) => {
+          const { name, value } = e.target;
+          setFormData({
+            ...formData,
+            [name]: value
+          });
+        };
+
+        const handleSubmit = async (e) => {
+          e.preventDefault();
+          setError('');
+          setLoading(true);
+
+          try {
+            const response = await fetch('/api/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || 'Login failed');
+            }
+
+            setUsername(formData.username);
+            setIsLoggedIn(true);
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        return (
+          <div style={formStyle}>
+            <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Login to Your Wishlist</h2>
+
+            {error && <div style={errorStyle}>{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="username">Username:</label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  style={inputStyle}
+                  placeholder="Enter your username"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password">Password:</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  style={inputStyle}
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                style={buttonStyle}
+                disabled={loading}
+              >
+                {loading ? 'Logging in...' : 'Login'}
+              </button>
+            </form>
+
+            <p style={{ textAlign: 'center', marginTop: '20px' }}>
+              Don't have an account? <a href="/register.html">Register</a>
+            </p>
+
+            <div style={{ marginTop: '20px', fontSize: '14px', textAlign: 'center' }}>
+              <p>Demo accounts: user1/pass1 or user2/pass2</p>
+            </div>
+          </div>
+        );
+      }
+
+      // Wishlist Manager Component
+      function WishlistManager({ username, setIsLoggedIn, isDarkMode }) {
+        const [wishlistItems, setWishlistItems] = React.useState([]);
+        const [loading, setLoading] = React.useState(true);
+        const [error, setError] = React.useState('');
+        const [formData, setFormData] = React.useState({
+          name: '',
+          description: '',
+          category: 'toy'
+        });
+        const [formError, setFormError] = React.useState('');
+
+        const containerStyle = {
+          maxWidth: '800px',
+          margin: '0 auto',
+          padding: '20px',
+          backgroundColor: isDarkMode ? '#333' : '#fff',
+          color: isDarkMode ? '#eee' : '#333',
+          borderRadius: '8px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+        };
+
+        const formStyle = {
+          marginBottom: '30px',
+          padding: '20px',
+          borderRadius: '8px',
+          backgroundColor: isDarkMode ? '#444' : '#f5f5f5'
+        };
+
+        const inputStyle = {
+          width: '100%',
+          padding: '10px',
+          marginBottom: '15px',
+          borderRadius: '4px',
+          border: '1px solid #ddd',
+          backgroundColor: isDarkMode ? '#555' : '#fff',
+          color: isDarkMode ? '#eee' : '#333'
+        };
+
+        const buttonStyle = {
+          padding: '10px 15px',
+          backgroundColor: isDarkMode ? '#5c8a9d' : '#4a7a8c',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '16px',
+          marginRight: '10px'
+        };
+
+        const itemStyle = {
+          padding: '15px',
+          marginBottom: '15px',
+          borderRadius: '8px',
+          backgroundColor: isDarkMode ? '#444' : '#f9f9f9',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        };
+
+        const errorStyle = {
+          color: '#e74c3c',
+          marginBottom: '15px'
+        };
+
+        // Fetch wishlist items on component mount
+        React.useEffect(() => {
+          const fetchWishlist = async () => {
+            try {
+              const response = await fetch('/api/wishlist');
+
+              if (!response.ok) {
+                if (response.status === 401) {
+                  // Unauthorized - user not logged in
+                  setIsLoggedIn(false);
+                  return;
+                }
+                throw new Error('Failed to fetch wishlist');
+              }
+
+              const data = await response.json();
+              setWishlistItems(data);
+            } catch (err) {
+              setError(err.message);
+            } finally {
+              setLoading(false);
+            }
+          };
+
+          fetchWishlist();
+        }, [setIsLoggedIn]);
+
+        const handleChange = (e) => {
+          const { name, value } = e.target;
+          setFormData({
+            ...formData,
+            [name]: value
+          });
+        };
+
+        const handleSubmit = async (e) => {
+          e.preventDefault();
+          setFormError('');
+
+          // Validate form
+          if (!formData.name || formData.name.length < 3) {
+            setFormError('Item name must be at least 3 characters');
+            return;
+          }
+
+          try {
+            const response = await fetch('/api/wishlist', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to add item');
+            }
+
+            // Refresh wishlist
+            const updatedResponse = await fetch('/api/wishlist');
+            const updatedData = await updatedResponse.json();
+            setWishlistItems(updatedData);
+
+            // Reset form
+            setFormData({
+              name: '',
+              description: '',
+              category: 'toy'
+            });
+          } catch (err) {
+            setFormError(err.message);
+          }
+        };
+
+        const handleDelete = async (index) => {
+          try {
+            const response = await fetch(`/api/wishlist/${index}`, {
+              method: 'DELETE'
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to delete item');
+            }
+
+            // Refresh wishlist
+            const updatedResponse = await fetch('/api/wishlist');
+            const updatedData = await updatedResponse.json();
+            setWishlistItems(updatedData);
+          } catch (err) {
+            setError(err.message);
+          }
+        };
+
+        const handleLogout = async () => {
+          try {
+            await fetch('/api/logout', { method: 'POST' });
+            setIsLoggedIn(false);
+          } catch (err) {
+            console.error('Error logging out:', err);
+          }
+        };
+
+        if (loading) {
+          return <LoadingSpinner />;
+        }
+
+        return (
+          <div style={containerStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2>Welcome, {username}!</h2>
+              <button onClick={handleLogout} style={{ ...buttonStyle, backgroundColor: isDarkMode ? '#d35400' : '#e74c3c' }}>
+                Logout
+              </button>
+            </div>
+
+            {error && <div style={errorStyle}>{error}</div>}
+
+            <div style={formStyle}>
+              <h3>Add New Item</h3>
+              {formError && <div style={errorStyle}>{formError}</div>}
+
+              <form onSubmit={handleSubmit}>
+                <div>
+                  <label htmlFor="name">Item Name:</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    style={inputStyle}
+                    placeholder="Enter item name (min 3 characters)"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="description">Description:</label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    style={inputStyle}
+                    placeholder="Enter a description"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="category">Category:</label>
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    style={inputStyle}
+                  >
+                    <option value="toy">Toy</option>
+                    <option value="book">Book</option>
+                    <option value="clothing">Clothing</option>
+                  </select>
+                </div>
+
+                <button type="submit" style={buttonStyle}>
+                  Add to Wishlist
+                </button>
+              </form>
+            </div>
+
+            <div>
+              <h3>Your Wishlist Items</h3>
+              {wishlistItems.length === 0 ? (
+                <p>No items in your wishlist yet.</p>
+              ) : (
+                <ul style={{ listStyle: 'none', padding: 0 }}>
+                  {wishlistItems.map((item, index) => (
+                    <li key={index} style={itemStyle}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <h4 style={{ margin: '0 0 10px 0' }}>{item.name}</h4>
+                        <span 
+                          style={{ 
+                            padding: '3px 8px', 
+                            borderRadius: '4px', 
+                            backgroundColor: isDarkMode ? '#2c3e50' : '#ecf0f1',
+                            color: isDarkMode ? '#ecf0f1' : '#2c3e50',
+                            fontSize: '14px'
+                          }}
+                        >
+                          {item.category}
+                        </span>
+                      </div>
+                      <p style={{ margin: '10px 0' }}>{item.description || 'No description provided'}</p>
+                      <button 
+                        onClick={() => handleDelete(index)} 
+                        style={{ 
+                          padding: '5px 10px', 
+                          backgroundColor: isDarkMode ? '#c0392b' : '#e74c3c',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      // Loading Spinner Component
+      function LoadingSpinner() {
+        return (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '40px',
+            margin: '20px 0'
+          }}>
+            <div style={{
+              border: '5px solid #f3f3f3',
+              borderTop: '5px solid #3498db',
+              borderRadius: '50%',
+              width: '50px',
+              height: '50px',
+              animation: 'spin 2s linear infinite',
+              marginBottom: '20px'
+            }}></div>
+            <p>Loading...</p>
+            <style>{`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
+          </div>
+        );
+      }
+
+      // Render the Wishlist App
+      const container = document.getElementById('wishlist-root');
+      const root = ReactDOM.createRoot(container);
+      root.render(<WishlistApp />);
+    </script>
   </main>
 </div>
 </body>
