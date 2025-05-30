@@ -7,11 +7,9 @@ const cookieParser = require('cookie-parser');
 const React = require('react');
 const ReactDOMServer = require('react-dom/server');
 
-// Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -177,63 +175,33 @@ app.delete('/api/wishlist/:index', authenticate, (req, res) => {
   res.status(200).json({ message: 'Item removed successfully' });
 });
 
-app.get('/', (req, res) => {
-  const username = req.cookies.username;
+const indexHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Hub</title>
+  <link href="https://fonts.cdnfonts.com/css/cocon" rel="stylesheet">
+  <link rel="stylesheet" href="public/style.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script src="/bundle.js"></script>
+</body>
+</html>
+`;
 
-  if (username) {
-    const users = getUsers();
-    const userExists = users.some(u => u.username === username);
-    if (!userExists) {
-      res.clearCookie('username', { path: '/', sameSite: 'lax' });
-      return res.redirect('/');
-    }
+fs.writeFileSync(path.join(__dirname, 'public', 'index.html'), indexHtml);
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/') || req.path.includes('.')) {
+    return next();
   }
 
-  let htmlContent = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
-
-  if (username) {
-    const welcomeSection = `
-      <section class="welcome-section">
-        <h2>Welcome back, ${username}!</h2>
-        <p>You are logged in. <a href="#" id="logout-link">Logout</a></p>
-      </section>
-    `;
-    htmlContent = htmlContent.replace('<section class="intro-text">', `<section class="intro-text">${welcomeSection}`);
-  } else {
-    const loginSection = `
-      <section class="login-section">
-        <h2>Login or Register</h2>
-        <p>Please <a href="/login.html">login</a> or <a href="/register.html">register</a> to access all features.</p>
-      </section>
-    `;
-    htmlContent = htmlContent.replace('<section class="intro-text">', `<section class="intro-text">${loginSection}`);
-  }
-
-  const hour = new Date().getHours();
-  const isDarkMode = hour < 6 || hour >= 20;
-
-  if (isDarkMode) {
-    const darkModeStyle = `
-      <style>
-        body { background-color: #222; color: #eee; }
-        .sidebar { background-color: #333; }
-        .content { background-color: #444; }
-        a { color: #9cf; }
-        a:hover { color: #cef; }
-      </style>
-    `;
-    htmlContent = htmlContent.replace('</head>', `${darkModeStyle}</head>`);
-  }
-
-  res.send(htmlContent);
-});
-
-app.get('/login.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
-});
-
-app.get('/register.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'register.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/api/weather-key', (req, res) => {
